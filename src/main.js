@@ -5,12 +5,8 @@ import mOrm from "./mOrm";
 
   try {
     await orm.createConnection({
-      "type": "postgres",
-      "host": "localhost",
-      "port": 5432,
-      "username": "efrei",
-      "password": "efrei",
-      "database": "iLovePragmatic"
+      //"uri": "postgres://efrei:efrei@localhost:5432/iLovePragmatic"
+      //entity: [Student,Project,Note]
     });
   } catch(err) {
     console.log(err);
