@@ -13,7 +13,7 @@ export default class PostgreSQL extends Core {
     try {
       await this.client.connect();
       this.client.query('SELECT NOW()',(err,res)=>{
-        console.log(err,res);
+        console.log(`NOW : ${res.rows[0].now}`);
         this.client.end();
       });
     } catch(e) {

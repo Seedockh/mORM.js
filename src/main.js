@@ -6,7 +6,8 @@ import mOrm from "./mOrm";
   try {
     await orm.createConnection({
       //"uri": "postgres://efrei:efrei@localhost:5432/iLovePragmatic"
-      //entity: [Student,Project,Note]
+      synchronize: true,
+      entity: [Student]
     });
   } catch(err) {
     console.log(err);
