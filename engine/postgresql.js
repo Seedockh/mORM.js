@@ -8,15 +8,16 @@ export default class PostgreSQL extends Core {
 
   async initialize() {
     const {host,port,username,password,database} = this;
-    this.client = new Client({ user: username, host, port, database, password });
+    this.client = new Client({ host, port, user:username, password, database });
 
     try {
-      await client.connect();
+      await this.client.connect();
       this.client.query('SELECT NOW()',(err,res)=>{
         console.log(err,res);
         this.client.end();
-      })
+      });
     } catch(e) {
+      console.log(e.message);
       console.log(`Database ${database} doesn't exist.`);
     }
   }
