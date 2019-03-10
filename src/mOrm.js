@@ -3,6 +3,7 @@ import { existsSync } from 'fs';
 import path from 'path';
 import PostgreSQL from './engine/postgresql.js';
 import Student from "./entities/student";
+import Entity from "./entities/entity";
 
 export default class mOrm {
   configPathName = "./morm.config.json";
@@ -14,19 +15,9 @@ export default class mOrm {
       if (!existsSync(path.join(__dirname,this.configPathName))) {
         throw new Error("Config file morm.config.json required");
       }
-      try {
-        this.config = require(this.configPathName);
-      } catch(e) {
-        console.log(e);
-        process.exit(-1);
-      }
-
-      if (dbConfig.synchronize) {
-        dbConfig.entities.forEach((entity)=>{
-          console.log("Calling remove");
-          console.log(entity);
-        });
-      }
+      this.config = require(this.configPathName);
+      this.config.synchronize = dbConfig.synchronize;
+      this.config.entities = dbConfig.entities;
       this.entities = { Student: Student };
 
     } else {
@@ -41,7 +32,6 @@ export default class mOrm {
     }
 
     //Instantiate database engine
-
     switch(this.config.type) {
       case 'postgres' :
         this.dbInstance = new PostgreSQL(this.config);
@@ -55,6 +45,15 @@ export default class mOrm {
 
     await this.dbInstance.initialize();
 
-    //Initialize entities (get class attributes > make SQL request on Client)
+  }
+
+  //Initialize entities (get class attributes > make SQL request on Client)
+  async getEntity(name) {
+    const entity = await new Entity(this.dbInstance,this.entities[name].name);
+    return entity;
+  }
+
+  async closeConnection() {
+    await this.dbInstance.close();
   }
 }
