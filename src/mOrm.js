@@ -1,7 +1,8 @@
 import { isEmpty } from 'lodash';
 import { existsSync } from 'fs';
 import path from 'path';
-import PostgreSQL from '../engine/postgresql.js';
+import PostgreSQL from './engine/postgresql.js';
+import Student from "./entities/student";
 
 export default class mOrm {
   configPathName = "./morm.config.json";
@@ -9,23 +10,35 @@ export default class mOrm {
   async createConnection(dbConfig = {}) {
 
     // checking configuration 🤘
-    if (isEmpty(dbConfig)) {
+    if (isEmpty(dbConfig) || !dbConfig.uri) {
       if (!existsSync(path.join(__dirname,this.configPathName))) {
         throw new Error("Config file morm.config.json required");
       }
-      this.config = require(this.configPathName);
+      try {
+        this.config = require(this.configPathName);
+      } catch(e) {
+        console.log(e);
+        process.exit(-1);
+      }
+
+      if (dbConfig.synchronize) {
+        dbConfig.entities.forEach((entity)=>{
+          console.log("Calling remove");
+          console.log(entity);
+        });
+      }
+      this.entities = { Student: Student };
+
     } else {
       if (dbConfig.uri) {
         const regExp = /^(.*):\/\/(.*):(.*)@(.*):(\d+)\/(.*)$/g;
         // ',' bypasses element 0
-        const [, type,username,password,host,port,database] = regExp.exec(dbConfig.uri);
+        const [,type,username,password,host,port,database] = regExp.exec(dbConfig.uri);
         this.config = { type, username, password, host, port, database };
-
-      } else {
+      } else if (dbConfig.type && dbConfig.host && dbConfig.username && dbConfig.password && dbConfig.database) {
         this.config = dbConfig;
       }
     }
-    console.log(this.config);
 
     //Instantiate database engine
 

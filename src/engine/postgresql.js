@@ -12,13 +12,19 @@ export default class PostgreSQL extends Core {
 
     try {
       await this.client.connect();
-      this.client.query('SELECT NOW()',(err,res)=>{
-        console.log(`NOW : ${res.rows[0].now}`);
-        this.client.end();
-      });
+      console.log(this.synchronize);
+      this.client.end();
     } catch(e) {
       console.log(e.message);
       console.log(`Database ${database} doesn't exist.`);
     }
+
+
+    /*this.client.query(`DROP TABLE IF EXISTS ${}`,(err,res)=>{
+
+
+      this.client.end();
+    });*/
+
   }
 }

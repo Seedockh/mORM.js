@@ -10,5 +10,7 @@ export default class Entity {
   async findAll({ attributes }) {}
   async findOne({ where, attributes }) {}
   async update(data) {}
-  async remove(data) {}
+  async remove(data) {
+    console.log("Removes data");
+  }
 }

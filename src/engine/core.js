@@ -9,7 +9,7 @@ export default class Core {
 
   dump(is_uri) {
     if (is_uri) {
-      console.log(`Database informations :
+      console.log(`Database URI informations :
       HOST : ${this.host}
       PORT : ${this.port}
       USERNAME : ${this.username}
