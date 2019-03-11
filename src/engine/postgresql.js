@@ -2,21 +2,22 @@ import { Client } from 'pg';
 import Core from './core.js';
 
 export default class PostgreSQL extends Core {
-  constructor(options) {
-    super(options);
+  constructor(options,extras) {
+    super(options,extras);
   }
 
   async initialize() {
-    const {host,port,username,password,database} = this;
+    const {host,port,username,password,database,synchronize,entities} = this;
     this.client = new Client({ host, port, user:username, password, database });
-
     try {
       await this.client.connect();
-
-      this.entities.forEach( entity => {
+      Object.values(entities).forEach( entity => {
         const table = entity.meta();
         try {
-          if (this.synchronize) this.client.query(this.dropTable(table.name));
+          if (synchronize) {
+            this.client.query(this.dropTable(table.name));
+          } else {
+          }
           const query = this.createTable(table.name,table.columns);
           console.log(`Request sent : ${query}`);
           this.client.query(query);
@@ -25,7 +26,6 @@ export default class PostgreSQL extends Core {
           console.log(err);
         }
       });
-
     } catch(e) {
       console.log(e.message);
       console.log(`Database ${database} doesn't exist.`);
@@ -63,6 +63,7 @@ export default class PostgreSQL extends Core {
   }
 
   dropTable(name) {
+    console.log(`Request sent : DROP TABLE IF EXISTS ${name}`);
     return `DROP TABLE IF EXISTS ${name}`;
   }
 

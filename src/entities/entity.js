@@ -81,12 +81,52 @@ export default class Entity {
       console.log(e.message);
     }
   }
+
+
   async update(data) {
-
-
+    if(typeof data!="object" || !data.where || Object.values(data).length<2) {
+      throw new Error('No valid data object to be updated.');
+    }
+    const updateClause = []
+    const whereClause = [];
+    Object.keys(data.where).forEach(key => {
+      const checkedVal = typeof data.where[key]==="number" ? data.where[key] : `'${data.where[key]}'`;
+      whereClause.push(`${key}=${checkedVal}`);
+    });
+    Object.keys(data).forEach(dat => {
+      if (dat!=='where') {
+        const checkedVal = typeof data[dat]==="number" ? data[dat] : `'${data[dat]}'`;
+        updateClause.push(`${dat}=${checkedVal}`);
+      }
+    });
+    try {
+      console.log(`Request sent : UPDATE ${this.name} SET ${updateClause.join(',')} WHERE ${whereClause.join(' AND ')};`);
+      await this.dbInstance.client.query(`UPDATE ${this.name} SET ${updateClause.join(',')} WHERE ${whereClause.join(' AND ')};`);
+      const result = await this.dbInstance.client.query(`SELECT * FROM ${this.name} WHERE ${updateClause[0]}`);
+      return JSON.stringify(result.rows,null,2);
+    } catch(e) {
+      console.log('Error while updating data.');
+      console.log(e.message);
+    }
   }
+
+
   async remove(data) {
-
-
+    if(typeof data!="object" || !data.where || data==={}) {
+      throw new Error('No valid data object to be deleted.');
+    }
+    const whereClause = [];
+    Object.keys(data.where).forEach(key => {
+      const checkedVal = typeof data.where[key]==="number" ? data.where[key] : `'${data.where[key]}'`;
+      whereClause.push(`${key}=${checkedVal}`);
+    });
+    try {
+      console.log(`Request sent : DELETE FROM ${this.name} WHERE ${whereClause.join(' AND ')};`);
+      const result = await this.dbInstance.client.query(`DELETE FROM ${this.name} WHERE ${whereClause.join(' AND ')};`);
+      return (JSON.stringify(result.rowCount,null,2));
+    } catch(e) {
+      console.log('Error while deleting data.');
+      console.log(e.message);
+    }
   }
 }

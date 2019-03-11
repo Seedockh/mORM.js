@@ -8,17 +8,19 @@ import Entity from "./entities/entity";
 export default class mOrm {
   configPathName = "./morm.config.json";
 
-  async createConnection(dbConfig = {}) {
-
+  async createConnection(dbConfig={},extras={ entities:[] }) {
     // checking configuration 🤘
     if (isEmpty(dbConfig) || !dbConfig.uri) {
       if (!existsSync(path.join(__dirname,this.configPathName))) {
         throw new Error("Config file morm.config.json required");
       }
       this.config = require(this.configPathName);
-      this.config.synchronize = dbConfig.synchronize;
-      this.config.entities = dbConfig.entities;
-      this.entities = { Student: Student };
+      this.config.synchronize = dbConfig.synchronize !== undefined ? dbConfig.synchronize : false;
+
+      this.entities = {};
+      for (const entity of extras.entities) {
+        this.entities[entity.prototype.constructor.name] = entity;
+      }
 
     } else {
       if (dbConfig.uri) {
@@ -34,7 +36,7 @@ export default class mOrm {
     //Instantiate database engine
     switch(this.config.type) {
       case 'postgres' :
-        this.dbInstance = new PostgreSQL(this.config);
+        this.dbInstance = new PostgreSQL(this.config,this.entities);
         break;
       case 'mysql' :
         this.dbInstance = new MySQL(this.config);

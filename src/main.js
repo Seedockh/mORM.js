@@ -5,14 +5,15 @@ import Student from "./entities/student";
   const orm = new mOrm();
 
   try {
-    await orm.createConnection({
+    await orm.createConnection(
       //"uri": "postgres://postgres:postgres@localhost:5432/iLovePragmatic",
-      synchronize: true,
-      entities: [Student]
-    });
+      { synchronize: true },
+      { entities: [Student] }
+    );
     console.log(`========> Database initialized successfully !`);
 
     // save method
+
     let student1 = { firstname: "Dora", lastname: "Lexploratrice"};
     let student2 = { firstname: "Jack", lastname: "Sparrow", age:25};
     let student3 = { firstname: "Neo", lastname: "Anderson", age:75};
@@ -53,9 +54,14 @@ import Student from "./entities/student";
     console.log(`========> Find Neo row : ${findFullNeo}`);
 
     // update method
-    const updateDora = await studentEntity.update({lastname:'The Explorator'});
+    const updateDora = await studentEntity.update({lastname:'The Explorator',where:{firstname:'Dora',id:1}});
+    console.log(`========> Update Dora row : ${updateDora}`);
+    const updateNeo = await studentEntity.update({lastname:'The Matrix Masta',age:1200,where:{firstname:'Neo',id:3}});
+    console.log(`========> Update Neo row : ${updateNeo}`);
 
     // remove method
+    const deleteBonpoil = await studentEntity.remove({where:{firstname:'Madame'}});
+    console.log(`========> Delete Madame Bonpoil row : ${deleteBonpoil} row(s) deleted.`);
 
     await orm.closeConnection();
   } catch(err) {
