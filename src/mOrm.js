@@ -8,7 +8,7 @@ import Entity from "./entities/entity";
 export default class mOrm {
   configPathName = "./morm.config.json";
 
-  async createConnection(dbConfig={},extras={ entities:[] }) {
+  async createConnection(dbConfig={},extras={ entities:[], logging:false }) {
     // checking configuration 🤘
     if (isEmpty(dbConfig) || !dbConfig.uri) {
       if (!existsSync(path.join(__dirname,this.configPathName))) {
@@ -44,7 +44,6 @@ export default class mOrm {
       default :
         throw new Error(`Engine ${this.config.type} not supported.`)
     }
-
     await this.dbInstance.initialize();
 
   }

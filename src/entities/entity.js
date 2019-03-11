@@ -36,15 +36,16 @@ export default class Entity {
     }
   }
 
-
   async findByPk(id, { attributes }={}) {
-    if(typeof id!="number") throw new Error('Row id must be a number.');
-    //if(typeof id!="object") throw new Error('No data to be saved.');
+    if(typeof id!='number') throw new Error(`Primary key of ${this.name} is not ${typeof id}.`);
     let attr = (typeof attributes!="undefined" && attributes!=null && attributes.length!=null && attributes.length>0) ? attributes.join(',') : '*';
-    console.log(`Request sent : SELECT ${attr} FROM ${this.name} WHERE id=${id}`);
     try {
-      const result = await this.dbInstance.client.query(`SELECT ${attr} FROM ${this.name} WHERE id=${id}`);
+      const res = await this.dbInstance.client.query(`SELECT a.attname, format_type(a.atttypid, a.atttypmod) AS data_type FROM pg_index i JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey) WHERE  i.indrelid = 'public.${this.name}'::regclass AND i.indisprimary;`);
+      const pk = await res.rows[0].attname;
+      console.log(`Request sent : SELECT ${attr} FROM ${this.name} WHERE ${pk}=${id}`);
+      const result = await this.dbInstance.client.query(`SELECT ${attr} FROM ${this.name} WHERE ${pk}=${id}`);
       return JSON.stringify(result.rows[0],null,2);
+
     } catch(e) {
       console.log(`Error while fetching data.`);
       console.log(e.message);

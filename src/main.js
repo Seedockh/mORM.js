@@ -8,7 +8,10 @@ import Student from "./entities/student";
     await orm.createConnection(
       //"uri": "postgres://postgres:postgres@localhost:5432/iLovePragmatic",
       { synchronize: true },
-      { entities: [Student] }
+      {
+        entities: [Student],
+        logging: true
+      },
     );
     console.log(`========> Database initialized successfully !`);
 

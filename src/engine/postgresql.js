@@ -32,7 +32,7 @@ export default class PostgreSQL extends Core {
     }
   }
 
-  createTable(name,cols) {
+  createTable(name,cols,logging) {
     let columns = "";
     for (let colName in cols) {
       let col = cols[colName];
