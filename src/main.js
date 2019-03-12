@@ -1,5 +1,7 @@
 import mOrm from "./mOrm";
 import Student from "./entities/student";
+import Project from "./entities/project";
+import Note from "./entities/note";
 
 (async () => {
   const orm = new mOrm();
@@ -9,7 +11,7 @@ import Student from "./entities/student";
       //"uri": "postgres://postgres:postgres@localhost:5432/iLovePragmatic",
       { synchronize: true },
       {
-        entities: [Student],
+        entities: [Student,Project,Note],
         logging: true
       },
     );
@@ -19,7 +21,14 @@ import Student from "./entities/student";
     let student3 = { firstname: "Neo", lastname: "Anderson", age:75};
     let student4 = { firstname: "Madame", lastname: "Bonpoil", age:10};
     let student5 = { firstname: "Stanley", lastname: "Ipkis", age:52};
+
+    let project = { name: "Incredible Project"};
+
+    let note = { note: 20 };
+
     const studentEntity = await orm.getEntity('Student');
+    const projectEntity = await orm.getEntity('Project');
+    const noteEntity = await orm.getEntity('Note');
 
     // save method
     let saved = await studentEntity.save(student1);
