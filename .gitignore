@@ -6,3 +6,6 @@ lib/
 
 # OPERATING SYSTEM
 .DS_Store
+
+# LOG DIRECTORY
+src/libs/logs/

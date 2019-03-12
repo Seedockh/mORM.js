@@ -1,34 +1,36 @@
 import { Client } from 'pg';
 import Core from './core.js';
+import Log from '../libs/mLog'
 
 export default class PostgreSQL extends Core {
   constructor(options,extras) {
     super(options,extras);
   }
+  logger = new Log(this.logging);
 
   async initialize() {
-    const {host,port,username,password,database,synchronize,entities} = this;
+    const {host,port,username,password,database,synchronize,entities,logging,logger} = this;
     this.client = new Client({ host, port, user:username, password, database });
     try {
       await this.client.connect();
-      Object.values(entities).forEach( entity => {
+      Object.values(entities).forEach( async entity => {
         const table = entity.meta();
         try {
           if (synchronize) {
-            this.client.query(this.dropTable(table.name));
-          } else {
+            await this.client.query(this.dropTable(table.name));
+            logger.w(this.dropTable(table.name));
           }
           const query = this.createTable(table.name,table.columns);
-          console.log(`Request sent : ${query}`);
           this.client.query(query);
+          logger.w(query);
         } catch(err) {
-          console.log(`Error whilde creating table ${table.name}.`);
-          console.log(err);
+          logger.w(`Error while creating table ${table.name}.`);
+          logger.w(err);
         }
       });
     } catch(e) {
-      console.log(e.message);
-      console.log(`Database ${database} doesn't exist.`);
+      logger.w(e.message);
+      logger.w(`Database ${database} doesn't exist.`);
     }
   }
 
@@ -55,7 +57,6 @@ export default class PostgreSQL extends Core {
 
         if (Object.keys(cols)[Object.keys(cols).indexOf(colName)+1]) columns += `, `;
       } else {
-        this.client.end();
         throw new Error(`Table field <${colName}> must have a specified type.`);
       }
     }
@@ -63,11 +64,12 @@ export default class PostgreSQL extends Core {
   }
 
   dropTable(name) {
-    console.log(`Request sent : DROP TABLE IF EXISTS ${name}`);
     return `DROP TABLE IF EXISTS ${name}`;
   }
 
   async close() {
-    await this.client.end();
+    await this.client.end((err,res)=>{
+      if (err) throw new Error("Connection ended badly.");
+    });
   }
 }
